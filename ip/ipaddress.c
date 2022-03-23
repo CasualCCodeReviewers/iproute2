@@ -2107,7 +2107,7 @@ static int ip_addr_list(struct nlmsg_chain *ainfo)
 static int ipaddr_list_flush_or_save(int argc, char **argv, int action)
 {
 	struct nlmsg_chain linfo = { NULL, NULL};
-	struct nlmsg_chain _ainfo = { NULL, NULL}, *ainfo = &_ainfo;
+	struct nlmsg_chain ainfo = { NULL, NULL};
 	struct nlmsg_list *l;
 	char *filter_dev = NULL;
 	int no_link = 0;
@@ -2263,10 +2263,10 @@ static int ipaddr_list_flush_or_save(int argc, char **argv, int action)
 		if (filter.oneline)
 			no_link = 1;
 
-		if (ip_addr_list(ainfo) != 0)
+		if (ip_addr_list(&ainfo) != 0)
 			goto out;
 
-		ipaddr_filter(&linfo, ainfo);
+		ipaddr_filter(&linfo, &ainfo);
 	}
 
 	for (l = linfo.head; l; l = l->next) {
@@ -2278,7 +2278,7 @@ static int ipaddr_list_flush_or_save(int argc, char **argv, int action)
 		if (brief || !no_link)
 			res = print_linkinfo(n, stdout);
 		if (res >= 0 && filter.family != AF_PACKET)
-			print_selected_addrinfo(ifi, ainfo->head, stdout);
+			print_selected_addrinfo(ifi, ainfo.head, stdout);
 		if (res > 0 && !do_link && show_stats)
 			print_link_stats(stdout, n);
 		close_json_object();
@@ -2286,7 +2286,7 @@ static int ipaddr_list_flush_or_save(int argc, char **argv, int action)
 	fflush(stdout);
 
 out:
-	free_nlmsg_chain(ainfo);
+	free_nlmsg_chain(&ainfo);
 	free_nlmsg_chain(&linfo);
 	delete_json_obj();
 	return 0;
